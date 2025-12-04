@@ -4,13 +4,24 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Great_Vibes, Playfair_Display } from "next/font/google";
-import { Mail } from "lucide-react";
+import { Mail, Music, Pause, ChevronsDown, Slash } from "lucide-react";
 import { Clock, MapPin } from "lucide-react";
 
 const greatVibes = Great_Vibes({ weight: "400", subsets: ["latin"] });
 const playfair = Playfair_Display({ weight: "600", subsets: ["latin"] });
 
+
+
 export default function Home() {
+
+// BACKSOUND
+const audioRef = useRef(null);
+const [isPlaying, setIsPlaying] = useState(false);
+
+// AUTO SCROLL
+const [autoScroll, setAutoScroll] = useState(false);
+let scrollIntervalRef = useRef(null);
+
   // STATE UTAMA
   const [mounted, setMounted] = useState(false); // cek hydration
   const [loading, setLoading] = useState(true); // loading screen
@@ -233,6 +244,51 @@ useEffect(() => {
   return () => window.removeEventListener("scroll", handleScroll);
 }, []);
 
+// PLAY MUSIC
+const startMusic = () => {
+  if (audioRef.current) {
+    audioRef.current.play();
+    setIsPlaying(true);
+  }
+};
+
+// PAUSE MUSIC
+const toggleMusic = () => {
+  if (!audioRef.current) return;
+
+  if (isPlaying) {
+    audioRef.current.pause();
+  } else {
+    audioRef.current.play();
+  }
+
+  setIsPlaying(!isPlaying);
+};
+
+const startAutoScroll = () => {
+  if (scrollIntervalRef.current) return; 
+
+  setAutoScroll(true);
+
+  scrollIntervalRef.current = setInterval(() => {
+    window.scrollBy({ top: 1, behavior: "smooth" }); // kecepatan minimal
+  }, 50);
+};
+
+const stopAutoScroll = () => {
+  setAutoScroll(false);
+  clearInterval(scrollIntervalRef.current);
+  scrollIntervalRef.current = null;
+};
+
+const toggleAutoScroll = () => {
+  if (autoScroll) {
+    stopAutoScroll();
+  } else {
+    startAutoScroll();
+  }
+};
+
   if (!mounted) return null; // cegah flicker SSR
 
   return (
@@ -268,12 +324,16 @@ useEffect(() => {
             <h1 className={`${greatVibes.className} text-6xl md:text-7xl text-rose-700 drop-shadow-lg`}>
               Jujum <br /> &amp; <br /> Putri
             </h1>
-            <button
-              onClick={handleOpen}
-              className="mt-10 px-8 py-3 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-700 transition-all flex items-center gap-2"
-            >
-              <Mail size={20} /> Buka Undangan
-            </button>
+<button
+  onClick={() => {
+    handleOpen();   // buka undangan
+    startMusic();   // mulai musik
+    startAutoScroll(); // mulai auto scroll
+  }}
+  className="mt-10 px-8 py-3 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-700 transition-all flex items-center gap-2"
+>
+  <Mail size={20} /> Buka Undangan
+</button>
           </div>
         </div>
       )}
@@ -694,6 +754,38 @@ useEffect(() => {
     {/* Garis pemisah di atas */}
     <div className="w-32 h-[1px] bg-gray-700 mx-auto mb-3"></div>
     Created by <b>Ezearl</b>
+  </div>
+)}
+
+<audio ref={audioRef} src="/music/musik.mp3" loop preload="auto"></audio>
+
+{opened && (
+  <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-[9999]">
+
+    {/* Tombol Musik */}
+    <button
+      onClick={toggleMusic}
+      className="w-12 h-12 bg-white/80 backdrop-blur-lg rounded-full shadow-lg flex items-center justify-center"
+    >
+      {isPlaying ? (
+        <Pause size={22} className="text-rose-600" />
+      ) : (
+        <Music size={22} className="text-rose-600" />
+      )}
+    </button>
+
+    {/* Tombol Auto Scroll */}
+    <button
+      onClick={toggleAutoScroll}
+      className="w-12 h-12 bg-white/80 backdrop-blur-lg rounded-full shadow-lg flex items-center justify-center"
+    >
+      {autoScroll ? (
+        <ChevronsDown size={22} className="text-rose-600" />
+      ) : (
+        <Slash size={22} className="text-rose-600" />
+      )}
+    </button>
+
   </div>
 )}
     </div>
