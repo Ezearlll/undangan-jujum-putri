@@ -263,57 +263,43 @@ const toggleMusic = () => {
 };
 
 
-// ------------------ imports di atas file ------------------
-// import { useEffect, useRef, useState } from "react";
-// ---------------------------------------------------------
-
 // STATE UI
-const [autoScroll, setAutoScroll] = useState(false); // untuk re-render tombol
+const [autoScroll, setAutoScroll] = useState(false);
 
-// REF runtime (hindari stale closure)
-const autoScrollRef = useRef(false);        // apakah auto-scroll aktif
-const isUserScrollingRef = useRef(false);   // user sedang scroll manual
-const scrollAnimationRef = useRef(null);    // id requestAnimationFrame
-const resumeTimerRef = useRef(null);        // timer untuk resume setelah user stop
-const lastYRef = useRef( 0);
+// REFS
+const autoScrollRef = useRef(false);
+const isUserScrollingRef = useRef(false);
+const scrollAnimationRef = useRef(null);
+const resumeTimerRef = useRef(null);
 
-// Smooth scroll loop (uses refs so always has fresh values)
+// LOOP AUTO-SCROLL (SUPER HALUS)
 const smoothScrollLoop = () => {
-  // jika auto-scroll aktif dan user tidak sedang scroll manual -> geser
   if (autoScrollRef.current && !isUserScrollingRef.current) {
-    // kecepatan: ubah angka untuk percepat/perlahankan
-    window.scrollBy(0, 1.6); // misal 1.6 px per frame (~60fps) => ~96 px/s
+    window.scrollBy(0, 1.2); // 1.2px/frame = ±72px/s → paling smooth
   }
-
-  // simpan id rAF supaya bisa dibatalkan
   scrollAnimationRef.current = requestAnimationFrame(smoothScrollLoop);
 };
 
-// Start auto-scroll
+// START
 const startAutoScroll = () => {
-  if (autoScrollRef.current) return; // sudah jalan
+  if (autoScrollRef.current) return;
 
   autoScrollRef.current = true;
-  setAutoScroll(true); // update UI (tombol)
+  setAutoScroll(true);
 
-  // start loop jika belum
-  if (!scrollAnimationRef.current) {
-    scrollAnimationRef.current = requestAnimationFrame(smoothScrollLoop);
-  }
+  scrollAnimationRef.current = requestAnimationFrame(smoothScrollLoop);
 };
 
-// Stop auto-scroll total (manual OFF)
+// STOP
 const stopAutoScroll = () => {
   autoScrollRef.current = false;
   setAutoScroll(false);
 
-  // cancel rAF
   if (scrollAnimationRef.current) {
     cancelAnimationFrame(scrollAnimationRef.current);
     scrollAnimationRef.current = null;
   }
 
-  // clear resume timer
   if (resumeTimerRef.current) {
     clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = null;
@@ -322,64 +308,41 @@ const stopAutoScroll = () => {
   isUserScrollingRef.current = false;
 };
 
-// Toggle tombol
+// TOGGLE BUTTON
 const toggleAutoScroll = () => {
   if (autoScrollRef.current) stopAutoScroll();
   else startAutoScroll();
 };
 
-// Listen user scroll to pause/resume (debounced very short)
+// DETECT USER SCROLL (tanpa konflik)
+// hanya gunakan wheel + touchmove → lebih akurat & tidak patah
 useEffect(() => {
   const handleUserScroll = () => {
-    const currentY = window.scrollY;
+    if (!autoScrollRef.current) return;
 
-    // user memang bergerak (finger/wheel)
-    if (currentY !== lastYRef.current) {
-      // set flag user scrolling
-      isUserScrollingRef.current = true;
+    isUserScrollingRef.current = true;
 
-      // clear previous resume timer
-      if (resumeTimerRef.current) {
-        clearTimeout(resumeTimerRef.current);
-        resumeTimerRef.current = null;
-      }
+    // reset timer
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
 
-      // set minor debounce: resume segera setelah user berhenti (80ms)
-      resumeTimerRef.current = setTimeout(() => {
-        // jika auto-scroll masih di-mode ON (user belum tekan OFF), resume
-        if (autoScrollRef.current) {
-          isUserScrollingRef.current = false;
-        }
-        resumeTimerRef.current = null;
-      }, 80); // 80ms debounce (boleh set ke 0 jika mau langsung)
-
-      lastYRef.current = currentY;
-    }
+    // user berhenti scroll 200ms → lanjut auto-scroll
+    resumeTimerRef.current = setTimeout(() => {
+      isUserScrollingRef.current = false;
+    }, 200);
   };
 
   window.addEventListener("wheel", handleUserScroll, { passive: true });
   window.addEventListener("touchmove", handleUserScroll, { passive: true });
-  window.addEventListener("scroll", handleUserScroll, { passive: true });
 
   return () => {
     window.removeEventListener("wheel", handleUserScroll);
     window.removeEventListener("touchmove", handleUserScroll);
-    window.removeEventListener("scroll", handleUserScroll);
   };
 }, []);
 
-// Cleanup on unmount: cancel rAF, clear timers
+// Cleanup
 useEffect(() => {
-  return () => {
-    if (scrollAnimationRef.current) {
-      cancelAnimationFrame(scrollAnimationRef.current);
-      scrollAnimationRef.current = null;
-    }
-    if (resumeTimerRef.current) {
-      clearTimeout(resumeTimerRef.current);
-      resumeTimerRef.current = null;
-    }
-  };
+  return () => stopAutoScroll();
 }, []);
 
   if (!mounted) return null; // cegah flicker SSR
