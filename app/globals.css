@@ -1,17 +1,13 @@
 @import "tailwindcss";
 
+/* Theme variables */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-sans: Arial, Helvetica, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +15,41 @@
   }
 }
 
+/* Apply theme */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* --- Animations --- */
+@keyframes fadein {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadein {
+  animation: fadein 1.6s ease-out forwards;
+}
+
+@keyframes slowzoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.07); }
+}
+
+.animate-slowzoom {
+  animation: slowzoom 20s ease-out forwards;
+}
+
+/* Custom background color */
+.bg-cream {
+  background-color: #f7f2eb;
+}
+
+/* Background image full (contain, no blur, responsive) */
+.bg-full {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #f7f2eb; /* warna cream */
 }
