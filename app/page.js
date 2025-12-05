@@ -774,32 +774,46 @@ useEffect(() => {
 </p>
 
     {/* Box Informasi */}
-    <div className={`w-full max-w-md md:max-w-lg lg:max-w-xl bg-white/95 shadow-lg backdrop-blur-lg rounded-[2rem] p-6 md:p-12 flex flex-col items-center text-center
-      transition-all duration-700 transform
-      ${animateSlide6 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-      style={{ marginLeft: "auto", marginRight: "auto"}}
-    >
-      <p className="text-xl md:text-2xl font-semibold text-gray-800 mb-2">
-        Bank BSI
-      </p>
-      <p className="text-2xl md:text-3xl font-bold text-rose-700 mb-2" id="rekeningNumber">
-        7301992674
-      </p>
-      <p className="text-lg md:text-xl text-gray-700 mb-6">
-        Atas Nama: Nenden Padliana Putri
-      </p>
+<div
+  className={` w-full max-w-md md:max-w-lg lg:max-w-xl bg-white/95 shadow-lg backdrop-blur-lg rounded-[2rem] p-6 md:p-12 flex flex-col items-center text-center
+    transition-all duration-700 transform
+    ${animateSlide6 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+  style={{ marginLeft: "auto", marginRight: "auto" }}
+>
+  {/* Ganti teks dengan logo BSI */}
+  <div className="mb-0 mt-[-40px]">
+    <Image
+      src="/images/bsi.png"
+      alt="Logo Bank BSI"
+      width={180}       // sesuaikan ukuran
+      height={10}       // sesuaikan ukuran
+      className="object-contain"
+      priority
+    />
+  </div>
 
-      {/* Tombol Salin */}
-      <button
-        onClick={() => {
-          navigator.clipboard.writeText("7301992674");
-          alert("Nomor rekening telah disalin!");
-        }}
-        className="px-6 py-3 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-700 transition-all"
-      >
-        Salin Nomor Rekening
-      </button>
-    </div>
+  <p
+    className="text-2xl md:text-3xl font-bold text-rose-700 mt-[-48px] mb-2"
+    id="rekeningNumber"
+  >
+    7301992674
+  </p>
+
+  <p className="text-lg md:text-xl text-gray-700 mb-6">
+    Atas nama: <b>Ujang Jujum</b>
+  </p>
+
+  {/* Tombol Salin */}
+  <button
+    onClick={() => {
+      navigator.clipboard.writeText("7301992674");
+      alert("Nomor rekening telah disalin!");
+    }}
+    className="px-6 py-3 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-700 transition-all"
+  >
+    Salin Nomor Rekening
+  </button>
+</div>
   </div>
 )}
 
